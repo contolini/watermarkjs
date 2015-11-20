@@ -4,15 +4,6 @@
 Object.defineProperty(exports, '__esModule', {
   value: true
 });
-
-/**
- * Return a watermark object
- *
- * @param {Array} resources - a collection of urls, File objects, or Image objects
- * @param {Function} init - an initialization function that is given Image objects before loading (only applies if resources is a collection of urls)
- * @param {Promise} promise - optional
- * @return {Object}
- */
 exports.watermark = watermark;
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj['default'] = obj; return newObj; } }
@@ -28,6 +19,15 @@ var _libBlob = require('./lib/blob');
 var _libStyle = require('./lib/style');
 
 var style = _interopRequireWildcard(_libStyle);
+
+/**
+ * Return a watermark object
+ *
+ * @param {Array} resources - a collection of urls, File objects, or Image objects
+ * @param {Function} init - an initialization function that is given Image objects before loading (only applies if resources is a collection of urls)
+ * @param {Promise} promise - optional
+ * @return {Object}
+ */
 
 function watermark(resources, init, promise) {
 
@@ -136,6 +136,13 @@ window.watermark = watermark;
 Object.defineProperty(exports, '__esModule', {
   value: true
 });
+exports.split = split;
+exports.decode = decode;
+exports.uint8 = uint8;
+
+var _functions = require('../functions');
+
+var url = /^data:([^;]+);base64,(.*)$/;
 
 /**
  * Split a data url into a content type and raw data
@@ -143,7 +150,10 @@ Object.defineProperty(exports, '__esModule', {
  * @param {String} dataUrl
  * @return {Array}
  */
-exports.split = split;
+
+function split(dataUrl) {
+  return url.exec(dataUrl).slice(1);
+}
 
 /**
  * Decode a base64 string
@@ -151,7 +161,10 @@ exports.split = split;
  * @param {String} base64
  * @return {String}
  */
-exports.decode = decode;
+
+function decode(base64) {
+  return window.atob(base64);
+}
 
 /**
  * Return a string of raw data as a Uint8Array
@@ -159,18 +172,6 @@ exports.decode = decode;
  * @param {String} data
  * @return {UInt8Array}
  */
-exports.uint8 = uint8;
-
-var _functions = require('../functions');
-
-var url = /^data:([^;]+);base64,(.*)$/;
-function split(dataUrl) {
-  return url.exec(dataUrl).slice(1);
-}
-
-function decode(base64) {
-  return window.atob(base64);
-}
 
 function uint8(data) {
   var length = data.length;
@@ -197,17 +198,17 @@ var blob = (0, _functions.sequence)(split, function (parts) {
 exports.blob = blob;
 
 },{"../functions":4}],3:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
 /**
  * Get the data url of a canvas
  *
  * @param {HTMLCanvasElement}
  * @return {String}
  */
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 exports.dataUrl = dataUrl;
 
 function dataUrl(canvas) {
@@ -215,11 +216,6 @@ function dataUrl(canvas) {
 }
 
 },{}],4:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
 /**
  * Returns a function that invokes the given function
  * with an array of arguments
@@ -227,7 +223,20 @@ Object.defineProperty(exports, "__esModule", {
  * @param {Function} fn
  * @return {Function}
  */
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 exports.invoker = invoker;
+exports.sequence = sequence;
+exports.identity = identity;
+
+function invoker(fn) {
+  return function (args) {
+    return fn.apply(null, args);
+  };
+}
 
 /**
  * Return a function that executes a sequence of functions from left to right,
@@ -236,21 +245,6 @@ exports.invoker = invoker;
  * @param {...funcs}
  * @return {Function}
  */
-exports.sequence = sequence;
-
-/**
- * Return the argument passed to it
- *
- * @param {Mixed} x
- * @return {Mixed}
- */
-exports.identity = identity;
-
-function invoker(fn) {
-  return function (args) {
-    return fn.apply(null, args);
-  };
-}
 
 function sequence() {
   for (var _len = arguments.length, funcs = Array(_len), _key = 0; _key < _len; _key++) {
@@ -264,6 +258,13 @@ function sequence() {
   };
 }
 
+/**
+ * Return the argument passed to it
+ *
+ * @param {Mixed} x
+ * @return {Mixed}
+ */
+
 function identity(x) {
   return x;
 }
@@ -274,67 +275,12 @@ function identity(x) {
 Object.defineProperty(exports, '__esModule', {
   value: true
 });
-
-/**
- * Given a resource, return an appropriate loading function for it's type
- *
- * @param {String|File|Image} resource
- * @return {Function}
- */
 exports.getLoader = getLoader;
-
-/**
- * Used for loading image resources asynchronously and maintaining
- * the supplied order of arguments
- *
- * @param {Array} resources - a mixed array of urls, File objects, or Image objects
- * @param {Function} init - called at the beginning of resource initialization
- * @return {Promise}
- */
 exports.load = load;
-
-/**
- * Load an image by its url
- *
- * @param {String} url
- * @param {Function} init - an optional image initializer
- * @return {Promise}
- */
 exports.loadUrl = loadUrl;
-
-/**
- * Return a collection of images from an
- * array of File objects
- *
- * @param {File} file
- * @return {Promise}
- */
 exports.loadFile = loadFile;
-
-/**
- * Create a new image, optionally configuring it's onload behavior
- *
- * @param {String} url
- * @param {Function} onload
- * @return {Image}
- */
 exports.createImage = createImage;
-
-/**
- * Convert an Image object to a canvas
- *
- * @param {Image} img
- * @return {HTMLCanvasElement}
- */
 exports.imageToCanvas = imageToCanvas;
-
-/**
- * Convert an array of image objects
- * to canvas elements
- *
- * @param {Array} images
- * @return {Array}
- */
 exports.mapToCanvas = mapToCanvas;
 
 var _functions = require('../functions');
@@ -353,6 +299,14 @@ function setAndResolve(img, src, resolve) {
   };
   img.src = src;
 }
+
+/**
+ * Given a resource, return an appropriate loading function for it's type
+ *
+ * @param {String|File|Image} resource
+ * @return {Function}
+ */
+
 function getLoader(resource) {
   var type = typeof resource;
 
@@ -367,6 +321,15 @@ function getLoader(resource) {
   return loadFile;
 }
 
+/**
+ * Used for loading image resources asynchronously and maintaining
+ * the supplied order of arguments
+ *
+ * @param {Array} resources - a mixed array of urls, File objects, or Image objects
+ * @param {Function} init - called at the beginning of resource initialization
+ * @return {Promise}
+ */
+
 function load(resources, init) {
   var promises = [];
   for (var i = 0; i < resources.length; i++) {
@@ -377,6 +340,14 @@ function load(resources, init) {
   }
   return Promise.all(promises);
 }
+
+/**
+ * Load an image by its url
+ *
+ * @param {String} url
+ * @param {Function} init - an optional image initializer
+ * @return {Promise}
+ */
 
 function loadUrl(url, init) {
   var img = new Image();
@@ -389,6 +360,14 @@ function loadUrl(url, init) {
   });
 }
 
+/**
+ * Return a collection of images from an
+ * array of File objects
+ *
+ * @param {File} file
+ * @return {Promise}
+ */
+
 function loadFile(file) {
   var reader = new FileReader();
   return new Promise(function (resolve) {
@@ -400,6 +379,14 @@ function loadFile(file) {
   });
 }
 
+/**
+ * Create a new image, optionally configuring it's onload behavior
+ *
+ * @param {String} url
+ * @param {Function} onload
+ * @return {Image}
+ */
+
 function createImage(url, onload) {
   var img = new Image();
   if (typeof onload === 'function') {
@@ -408,6 +395,13 @@ function createImage(url, onload) {
   img.src = url;
   return img;
 }
+
+/**
+ * Convert an Image object to a canvas
+ *
+ * @param {Image} img
+ * @return {HTMLCanvasElement}
+ */
 
 function imageToCanvas(img) {
   var canvas = document.createElement('canvas');
@@ -419,16 +413,19 @@ function imageToCanvas(img) {
   return canvas;
 }
 
+/**
+ * Convert an array of image objects
+ * to canvas elements
+ *
+ * @param {Array} images
+ * @return {Array}
+ */
+
 function mapToCanvas(images) {
   return images.map(imageToCanvas);
 }
 
 },{"../functions":4}],6:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, '__esModule', {
-  value: true
-});
 /**
  * Return a function for positioning a watermark on a target canvas
  *
@@ -437,55 +434,20 @@ Object.defineProperty(exports, '__esModule', {
  * @param {Number} alpha
  * @return {Function}
  */
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
 exports.atPos = atPos;
-
-/**
- * Place the watermark in the lower right corner of the target
- * image
- *
- * @param {Number} alpha
- * @return {Function}
- */
 exports.lowerRight = lowerRight;
-
-/**
- * Place the watermark in the upper right corner of the target
- * image
- *
- * @param {Number} alpha
- * @return {Function}
- */
 exports.upperRight = upperRight;
-
-/**
- * Place the watermark in the lower left corner of the target
- * image
- *
- * @param {Number} alpha
- * @return {Function}
- */
 exports.lowerLeft = lowerLeft;
-
-/**
- * Place the watermark in the upper left corner of the target
- * image
- *
- * @param {Number} alpha
- * @return {Function}
- */
 exports.upperLeft = upperLeft;
-
-/**
- * Place the watermark in the center of the target
- * image
- *
- * @param {Number} alpha
- * @return {Function}
- */
 exports.center = center;
 
 function atPos(xFn, yFn, alpha) {
-  alpha || (alpha = 1);
+  alpha || (alpha = 1.0);
   return function (target, watermark) {
     var context = target.getContext('2d');
     context.save();
@@ -498,6 +460,14 @@ function atPos(xFn, yFn, alpha) {
   };
 }
 
+/**
+ * Place the watermark in the lower right corner of the target
+ * image
+ *
+ * @param {Number} alpha
+ * @return {Function}
+ */
+
 function lowerRight(alpha) {
   return atPos(function (target, mark) {
     return target.width - (mark.width + 10);
@@ -505,6 +475,14 @@ function lowerRight(alpha) {
     return target.height - (mark.height + 10);
   }, alpha);
 }
+
+/**
+ * Place the watermark in the upper right corner of the target
+ * image
+ *
+ * @param {Number} alpha
+ * @return {Function}
+ */
 
 function upperRight(alpha) {
   return atPos(function (target, mark) {
@@ -514,6 +492,14 @@ function upperRight(alpha) {
   }, alpha);
 }
 
+/**
+ * Place the watermark in the lower left corner of the target
+ * image
+ *
+ * @param {Number} alpha
+ * @return {Function}
+ */
+
 function lowerLeft(alpha) {
   return atPos(function (target, mark) {
     return 10;
@@ -522,6 +508,14 @@ function lowerLeft(alpha) {
   }, alpha);
 }
 
+/**
+ * Place the watermark in the upper left corner of the target
+ * image
+ *
+ * @param {Number} alpha
+ * @return {Function}
+ */
+
 function upperLeft(alpha) {
   return atPos(function (target, mark) {
     return 10;
@@ -529,6 +523,14 @@ function upperLeft(alpha) {
     return 10;
   }, alpha);
 }
+
+/**
+ * Place the watermark in the center of the target
+ * image
+ *
+ * @param {Number} alpha
+ * @return {Function}
+ */
 
 function center(alpha) {
   return atPos(function (target, mark) {
@@ -561,11 +563,6 @@ var text = txt;
 exports.text = text;
 
 },{"./image":6,"./text":8}],8:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, '__esModule', {
-  value: true
-});
 /**
  * Return a function for positioning a watermark on a target canvas
  *
@@ -577,7 +574,38 @@ Object.defineProperty(exports, '__esModule', {
  * @param {Number} alpha
  * @return {Function}
  */
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
 exports.atPos = atPos;
+exports.lowerRight = lowerRight;
+exports.lowerLeft = lowerLeft;
+exports.upperRight = upperRight;
+exports.upperLeft = upperLeft;
+exports.center = center;
+
+function atPos(xFn, yFn, text, font, fillStyle, alpha, strokeStyle, strokeWidth) {
+  alpha || (alpha = 1.0);
+  return function (target) {
+    var context = target.getContext('2d');
+    context.save();
+
+    context.globalAlpha = alpha;
+    context.fillStyle = fillStyle;
+    context.font = font;
+    var metrics = context.measureText(text);
+    context.fillText(text, xFn(target, metrics, context), yFn(target, metrics, context));
+    if (strokeStyle) {
+      context.strokeStyle = strokeStyle;
+      context.lineWidth = strokeWidth || 3;
+      context.strokeText(text, xFn(target, metrics, context), yFn(target, metrics, context));
+    }
+    context.restore();
+    return target;
+  };
+}
 
 /**
  * Write text to the lower right corner of the target canvas
@@ -589,7 +617,14 @@ exports.atPos = atPos;
  * @param {Number} y - height in text metrics is not very well supported. This is a manual value
  * @return {Function}
  */
-exports.lowerRight = lowerRight;
+
+function lowerRight(text, font, fillStyle, alpha, y, strokeStyle, strokeWidth) {
+  return atPos(function (target, metrics) {
+    return target.width - (metrics.width + 10);
+  }, function (target) {
+    return y || target.height - 10;
+  }, text, font, fillStyle, alpha, strokeStyle, strokeWidth);
+}
 
 /**
  * Write text to the lower left corner of the target canvas
@@ -601,7 +636,14 @@ exports.lowerRight = lowerRight;
  * @param {Number} y - height in text metrics is not very well supported. This is a manual value
  * @return {Function}
  */
-exports.lowerLeft = lowerLeft;
+
+function lowerLeft(text, font, fillStyle, alpha, y, strokeStyle, strokeWidth) {
+  return atPos(function () {
+    return 10;
+  }, function (target) {
+    return y || target.height - 10;
+  }, text, font, fillStyle, alpha, strokeStyle, strokeWidth);
+}
 
 /**
  * Write text to the upper right corner of the target canvas
@@ -613,7 +655,14 @@ exports.lowerLeft = lowerLeft;
  * @param {Number} y - height in text metrics is not very well supported. This is a manual value
  * @return {Function}
  */
-exports.upperRight = upperRight;
+
+function upperRight(text, font, fillStyle, alpha, y, strokeStyle, strokeWidth) {
+  return atPos(function (target, metrics) {
+    return target.width - (metrics.width + 10);
+  }, function () {
+    return y || 20;
+  }, text, font, fillStyle, alpha, strokeStyle, strokeWidth);
+}
 
 /**
  * Write text to the upper left corner of the target canvas
@@ -625,7 +674,14 @@ exports.upperRight = upperRight;
  * @param {Number} y - height in text metrics is not very well supported. This is a manual value
  * @return {Function}
  */
-exports.upperLeft = upperLeft;
+
+function upperLeft(text, font, fillStyle, alpha, y, strokeStyle, strokeWidth) {
+  return atPos(function () {
+    return 10;
+  }, function () {
+    return y || 20;
+  }, text, font, fillStyle, alpha, strokeStyle, strokeWidth);
+}
 
 /**
  * Write text to the center of the target canvas
@@ -637,63 +693,13 @@ exports.upperLeft = upperLeft;
  * @param {Number} y - height in text metrics is not very well supported. This is a manual value
  * @return {Function}
  */
-exports.center = center;
 
-function atPos(xFn, yFn, text, font, fillStyle, alpha) {
-  alpha || (alpha = 1);
-  return function (target) {
-    var context = target.getContext('2d');
-    context.save();
-
-    context.globalAlpha = alpha;
-    context.fillStyle = fillStyle;
-    context.font = font;
-    var metrics = context.measureText(text);
-    context.fillText(text, xFn(target, metrics, context), yFn(target, metrics, context));
-
-    context.restore();
-    return target;
-  };
-}
-
-function lowerRight(text, font, fillStyle, alpha, y) {
-  return atPos(function (target, metrics) {
-    return target.width - (metrics.width + 10);
-  }, function (target) {
-    return y || target.height - 10;
-  }, text, font, fillStyle, alpha);
-}
-
-function lowerLeft(text, font, fillStyle, alpha, y) {
-  return atPos(function () {
-    return 10;
-  }, function (target) {
-    return y || target.height - 10;
-  }, text, font, fillStyle, alpha);
-}
-
-function upperRight(text, font, fillStyle, alpha, y) {
-  return atPos(function (target, metrics) {
-    return target.width - (metrics.width + 10);
-  }, function () {
-    return y || 20;
-  }, text, font, fillStyle, alpha);
-}
-
-function upperLeft(text, font, fillStyle, alpha, y) {
-  return atPos(function () {
-    return 10;
-  }, function () {
-    return y || 20;
-  }, text, font, fillStyle, alpha);
-}
-
-function center(text, font, fillStyle, alpha, y) {
+function center(text, font, fillStyle, alpha, y, strokeStyle, strokeWidth) {
   return atPos(function (target, metrics, ctx) {
     ctx.textAlign = 'center';return target.width / 2;
   }, function (target, metrics, ctx) {
     ctx.textBaseline = 'middle';return target.height / 2;
-  }, text, font, fillStyle, alpha);
+  }, text, font, fillStyle, alpha, strokeStyle, strokeWidth);
 }
 
 },{}]},{},[1]);
